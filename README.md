@@ -10,9 +10,8 @@ The project was previously known as `Femida Finals` and `Themis Finals`.
 
 - [Prerequisites](prerequisites.md)
 - [Infrastructure guide](infrastructure-guide.md)
-- [Service checkers guide]()
-- [Contest management guide]()
-- [Team guide]()
+- [Service checker guide](service-checker-guide.md)
+- [Contest management guide](contest-management-guide.md)
 
 ## Maintainers
 
