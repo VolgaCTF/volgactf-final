@@ -468,5 +468,17 @@ $ script/converge checker1
   ...
 ```
 
+# Step 6: start team vulnboxes
+
+```sh
+$ cd ~/Projects/ctf-infrastructure
+$ vagrant up team1 team2
+```
+
+Two desktop VM are started. They may be used so as to test the contest network as well as launch attacks. Here are some tips:
+
+- in a team vulnbox, run `python -m SimpleHTTPServer 8080` so that `checker1` considers a service state as `UP`
+- in a team vulnbox, install `themis.finals` package so at to obtain information about flags and submit them
+
 ## License
 MIT @ [VolgaCTF](https://github.com/VolgaCTF)
