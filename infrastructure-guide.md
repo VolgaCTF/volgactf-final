@@ -121,7 +121,7 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
 
     Environment settings are shared for every VM instance (or a `node`, in [Chef terms](https://docs.chef.io/nodes.html)).
 
-    The settings below are copied from `sample/environments/development.json` but may well be adjusted to content organiser's liking.
+    The settings below are copied from `sample/environments/development.json` but may well be adjusted to contest organiser's liking.
 
     ```json
     {
@@ -255,7 +255,7 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
 
     Node settings are applied to a specific VM instance.
 
-    The settings below are copied from `sample/nodes/*.json` but may well be adjusted to content organiser's liking.
+    The settings below are copied from `sample/nodes/*.json` but may well be adjusted to contest organiser's liking.
 
     **redis.json**
 
@@ -457,6 +457,7 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
 # Step 5: install and configure software on VM instances
 
 ```sh
+$ cd ~/Projects/ctf-infrastructure
 $ script/converge redis
   ...
 $ script/converge postgres
