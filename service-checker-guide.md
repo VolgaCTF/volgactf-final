@@ -10,7 +10,14 @@ A so-called fleet is managed by `systemctl`:
 
 ```sh
 $ ssh checker1.final.volgactf.test
-$ sudo systemctl start/stop/status volgactf_final_checker1.target
+$ sudo systemctl start/stop volgactf_final_checker1.target
+```
+
+The target comprises several systemd services. To get their statuses, run
+
+```sh
+$ ssh checker1.final.volgactf.test
+$ sudo systemctl status 'volgactf_final_checker1*'
 ```
 
 ## License

@@ -478,7 +478,7 @@ $ vagrant up team1 team2
 Two desktop VM are started. They may be used so as to test the contest network as well as launch attacks. Here are some tips:
 
 - in a team vulnbox, run `python -m SimpleHTTPServer 8080` so that `checker1` considers a service state as `UP`
-- in a team vulnbox, install `themis.finals` Python package so at to obtain information about flags and submit them
+- in a team vulnbox, install `volgactf.final` Python package so at to obtain information about flags and submit them
 
 ## License
 MIT @ [VolgaCTF](https://github.com/VolgaCTF)

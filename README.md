@@ -12,6 +12,8 @@ The project was previously known as `Femida Finals` and `Themis Finals`.
 - [Infrastructure guide](infrastructure-guide.md)
 - [Service checker guide](service-checker-guide.md)
 - [Contest management guide](contest-management-guide.md)
+- [Contest regulations sample](contest-regulations-sample.md)
+- [Technical information sample](technical-information-sample.md)
 
 ## Maintainers
 
