@@ -85,12 +85,16 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5aiazVMn0K9M0PyP4/iGZpKKqYez\n+6rCzO8iUjfkVv
 
 You must submit **flags** (not capsules!) to `final.volgactf.test`. Each flag lives for 6 minutes.
 
-API:
+### API
 
 - [VolgaCTF Final API](https://github.com/VolgaCTF/volgactf-final-api) - public APIs description
 - [volgactf.final](https://github.com/VolgaCTF/volgactf-final-py) - CLI & public API library for Python 2/3
 
-*getinfo rate limit 10 r/s, submit rate limit 5 r/s*
+### Rate limits
+
+- Flag info 10r/s
+- Flag submit 5r/s
+- Service status 10r/s
 
 ## An​ ​insight​ ​into​ ​ACS
 

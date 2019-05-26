@@ -190,7 +190,7 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
               "internal_networks": [ // admin network (contest organisers)
                 "172.20.0.0/24"
               ],
-              "api_req_limits": { // Flag API limits (based on Nginx rate limiting)
+              "api_req_limits": { // API limits (based on Nginx rate limiting)
                 "flag_info": {
                   "rate": "10r/s",
                   "burst": 5,
@@ -198,6 +198,11 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
                 },
                 "flag_submit": {
                   "rate": "5r/s",
+                  "burst": 5,
+                  "nodelay": true
+                },
+                "service_status": {
+                  "rate": "10r/s",
                   "burst": 5,
                   "nodelay": true
                 }
