@@ -6,7 +6,7 @@ This guide provides an example of the setup process and requires a **DevOps** se
 
 ## Expected result
 
-- 4 virtual machine instances, which are configured to host an A/D CTF
+- 5 virtual machine instances, which are configured to host an A/D CTF
 - 2 virtual machine instances, which are configured to act as teams' vulnboxes
 
 ## Step 0: network
@@ -22,6 +22,7 @@ It is required that virtual machine instances (VMI) have their own unique FQDN w
 | **master** | `master.final.volgactf.test` | `172.20.0.2` |
 | **postgres** | `postgres.final.volgactf.test` | `172.20.0.3` |
 | **redis** | `redis.final.volgactf.test` | `172.20.0.4` |
+| **monitor** | `monitor.final.volgactf.test` | `172.20.0.5` |
 | **checker1** | `checker1.final.volgactf.test` | `172.20.0.11` |
 | **team1** | `team1.final.volgactf.test` | `172.20.1.3` |
 | **team2** | `team2.final.volgactf.test` | `172.20.2.3` |
@@ -82,7 +83,7 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
 
     ```sh
     $ cd ~/Projects/ctf-infrastructure
-    $ vagrant up redis postgres master checker1
+    $ vagrant up redis postgres master monitor checker1
     ```
 
 2. Check SSH connection
@@ -94,6 +95,8 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
     $ ssh postgres.final.volgactf.test
       ...
     $ ssh master.final.volgactf.test
+      ...
+    $ ssh monitor.final.volgactf.test
       ...
     $ ssh checker1.final.volgactf.test
       ...
@@ -109,11 +112,13 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
       ...
     $ script/bootstrap master
       ...
+    $ script/bootstrap monitor
+      ...
     $ script/bootstrap checker1
       ...
     ```
 
-    Several files will be created in `nodes` directory, namely `redis.json`, `postgres.json`, `master.json`, `checker1.json`. They **must** be modified so that they are in accord with the files in `sample/nodes` directory.
+    Several files will be created in `nodes` directory, namely `redis.json`, `postgres.json`, `master.json`, `monitor.json` and `checker1.json`. They **must** be modified so that they are in accord with the files in `sample/nodes` directory.
 
 # Step 4: examine configuration options
 
@@ -277,7 +282,13 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
             "redis": {
               "allow_access_from": [ // Redis server must be accessible only from master server
                 "172.20.0.2/32"
-              ]
+              ],
+              "netdata": {
+                "enabled": true,
+                "stream": {
+                  "destination": "172.20.0.5"
+                }
+              }
             }
           }
         }
@@ -306,7 +317,13 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
             "postgres": {
               "allow_access_from": [ // PostgreSQL server must be accessible only from master server
                 "172.20.0.2/32"
-              ]
+              ],
+              "netdata": {
+                "enabled": true,
+                "stream": {
+                  "destination": "172.20.0.5"
+                }
+              }
             }
           }
         }
@@ -335,7 +352,13 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
             "master": {
               "extra_fqdn": [ // extra FQDN (e.g. public) for scoreboard
                 "final.volgactf.test"
-              ]
+              ],
+              "netdata": {
+                "enabled": true,
+                "stream": {
+                  "destination": "172.20.0.5"
+                }
+              }
             }
           }
         }
@@ -345,6 +368,61 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
       },
       "run_list": [
         "recipe[main::master_server]"
+      ]
+    }
+    ```
+
+    **monitor.json**
+
+    ```json
+    {
+      "name": "monitor",
+      "chef_environment": "development",
+      "normal": {
+        "knife_zero": {
+          "host": "monitor.final.volgactf.test"
+        },
+        "volgactf": {
+          "final": {
+            "monitor": {
+              "allow_access_from": [
+                "172.20.0.0/24"
+              ],
+              "nginx": {
+                "fqdn": "monitor.final.volgactf.test"
+              },
+              "netdata": {
+                "listen": {
+                  "host": "172.20.0.5"
+                },
+                "stream": {
+                  "master_server": {
+                    "origin": "172.20.0.2",
+                    "history": 7200
+                  },
+                  "postgres_server": {
+                    "origin": "172.20.0.3",
+                    "history": 7200
+                  },
+                  "redis_server": {
+                    "origin": "172.20.0.4",
+                    "history": 7200
+                  },
+                  "checker1_server": {
+                    "origin": "172.20.0.11",
+                    "history": 7200
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "automatic": {
+        "fqdn": "monitor.final.volgactf.test"
+      },
+      "run_list": [
+        "recipe[main::monitor_server]"
       ]
     }
     ```
@@ -373,6 +451,12 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
                 "name": "checker1", // Docker image name
                 "repo": "volgactf/volgactf-final-devenv-checker", // Docker image repository
                 "tag": "1.0.0" // Docker image tag/version
+              },
+              "netdata": {
+                "enabled": true,
+                "stream": {
+                  "destination": "172.20.0.5"
+                }
               }
             }
           }
@@ -426,6 +510,30 @@ FQDNs must resolve within the host computer, on which VMI are run. That implies 
       ...
     ```
 
+    **netdata**
+    ```sh
+    $ cd ~/Projects/ctf-infrastructure
+    $ python3 gen_data_bag.py netdata
+    {
+      "id": "development",
+      "stream": {
+        "api_key": {
+          "master_server": "9baf6fee-7ebb-4af5-874e-6ebf020260af",
+          "redis_server": "937fb01d-4a53-4bb3-a69d-11b2d7b4385f",
+          "postgres_server": "641ff3d4-1f17-4d2b-ab4b-d5dedd907d3f",
+          "checker1_server": "e9158640-ca86-4cdb-9fb1-ff723ce8d092"
+        }
+      }
+    }
+    $ script/databag create netdata
+      ...
+      copy the output above and save
+      ...
+      use "script/databag show netdata" to view settings
+      or "script/databag edit netdata" to edit them
+      ...
+    ```
+
     **volgactf-final**
     ```sh
     $ cd ~/Projects/ctf-infrastructure
@@ -468,6 +576,8 @@ $ script/converge redis
 $ script/converge postgres
   ...
 $ script/converge master
+  ...
+$ script/converge monitor
   ...
 $ script/converge checker1
   ...
