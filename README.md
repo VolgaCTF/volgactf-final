@@ -4,20 +4,20 @@
 
 It was devised for [VolgaCTF](https://volgactf.ru) competition in 2014 and has been constantly improved over a series of competitions, namely [VolgaCTF](https://ctftime.org/ctf/53) and [CTF.Moscow](https://ctftime.org/ctf/138).
 
-The project was previously known as `Femida Finals` and `Themis Finals`.
+The project was previously known as *Femida Finals* and *Themis Finals*.
 
-## Documentation
+## [DEPRECATED] Documentation
 
-- [Prerequisites](prerequisites.md)
-- [Infrastructure guide](infrastructure-guide.md)
-- [Service checker guide](service-checker-guide.md)
-- [Contest management guide](contest-management-guide.md)
-- [Contest regulations sample](contest-regulations-sample.md)
-- [Technical information sample](technical-information-sample.md)
+- [Prerequisites](docs-deprecated/prerequisites.md)
+- [Infrastructure guide](docs-deprecated/infrastructure-guide.md)
+- [Service checker guide](docs-deprecated/service-checker-guide.md)
+- [Contest management guide](docs-deprecated/contest-management-guide.md)
+- [Contest regulations sample](docs-deprecated/contest-regulations-sample.md)
+- [Technical information sample](docs-deprecated/technical-information-sample.md)
 
 ## Maintainers
 
-- [Alexander Pyatkin](https://aspyatkin.com)
+- [Aleksandr Piatkin](https://github.com/aspyatkin)
 
 ## License
 MIT @ [VolgaCTF](https://github.com/VolgaCTF)
