@@ -1,0 +1,37 @@
+module VolgaCTF
+  module Final
+    module Domain
+      network do
+        {% for internal_cidr in volgactf.final.transient.network.internal %}
+        internal '{{ internal_cidr }}'
+        {% endfor %}
+      end
+
+      settings do
+        flag_lifetime {{ volgactf.final.settings.flag_lifetime }}
+        round_timespan {{ volgactf.final.settings.round_timespan }}
+        poll_timespan {{ volgactf.final.settings.poll_timespan }}
+        poll_delay {{ volgactf.final.settings.poll_delay }}
+      end
+
+      {% for team_name, team_details in volgactf.final.teams.items() %}
+      team '{{ team_name }}' do
+        name '{{ team_details.name }}'
+        network '{{ volgactf.final.transient.network.teams[loop.index - 1] }}'
+        guest {% if team_details.guest or false %}true{% else %}false{% endif +%}
+      end
+
+      {% endfor %}
+
+      {% for service_name, service_details in volgactf.final.services.items() %}
+      service '{{ service_name }}' do
+        name '{{ service_details.name }}'
+        vulnbox_endpoint_code %Q[::IP.new('%{team_network}').to_range.first | ::IP.new('0.0.0.3')]
+        checker_endpoint 'http://{{ service_name }}-checker-ingress'
+        attack_priority true
+      end
+
+      {% endfor %}
+    end
+  end
+end

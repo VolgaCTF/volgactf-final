@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+	ALTER SYSTEM SET password_encryption = 'scram-sha-256';
+
+	CREATE USER volgactf_final_admin WITH PASSWORD '{{ volgactf.final.db.admin_pwd }}';
+	CREATE USER volgactf_final_writer WITH PASSWORD '{{ volgactf.final.db.writer_pwd }}';
+	CREATE USER volgactf_final_reader WITH PASSWORD '{{ volgactf.final.db.reader_pwd }}';
+
+	CREATE DATABASE volgactf_final;
+EOSQL
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname volgactf_final <<-EOSQL
+	GRANT ALL PRIVILEGES ON DATABASE volgactf_final TO volgactf_final_admin;
+	GRANT ALL PRIVILEGES ON SCHEMA public TO volgactf_final_admin;
+
+	GRANT CONNECT ON DATABASE volgactf_final TO volgactf_final_writer;
+	GRANT USAGE ON SCHEMA public TO volgactf_final_writer;
+	GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO volgactf_final_writer;
+	ALTER DEFAULT PRIVILEGES FOR USER volgactf_final_admin IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO volgactf_final_writer;
+
+	GRANT CONNECT ON DATABASE volgactf_final TO volgactf_final_reader;
+	GRANT USAGE ON SCHEMA public TO volgactf_final_reader;
+	GRANT SELECT ON ALL TABLES IN SCHEMA public TO volgactf_final_reader;
+	ALTER DEFAULT PRIVILEGES FOR USER volgactf_final_admin IN SCHEMA public GRANT SELECT ON TABLES TO volgactf_final_reader;
+EOSQL

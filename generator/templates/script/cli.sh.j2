@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+
+COMMAND=$1
+SUBCOMMAND=$2
+RAKE_OPTS="$COMMAND:$SUBCOMMAND"
+
+if [ "$COMMAND" = "competition" ] && [ "$SUBCOMMAND" = "init" ]; then
+    # DOMAIN_FILE=`realpath $3`
+    RAKE_OPTS="$RAKE_OPTS[$3]"
+fi
+
+if [ "$COMMAND" = "service" ] && [ "$SUBCOMMAND" = "init" ]; then
+    # DOMAIN_FILE=`realpath $3`
+    RAKE_OPTS="$RAKE_OPTS[$3]"
+fi
+
+if [ "$COMMAND" = "service" ] && [ "$SUBCOMMAND" = "disable" ]; then
+    ALIAS=$3
+    ROUND=$4
+    RAKE_OPTS="$RAKE_OPTS[$ALIAS,$ROUND]"
+fi
+
+if [ "$COMMAND" = "service" ] && [ "$SUBCOMMAND" = "enable" ]; then
+    ALIAS=$3
+    ROUND=$4
+    RAKE_OPTS="$RAKE_OPTS[$ALIAS,$ROUND]"
+fi
+
+PROJECT=`docker compose ls -q`
+docker run --rm -a STDIN -a STDOUT -a STDERR --network ${PROJECT}_{{ volgactf.final.network.name }} --env-file ./env/redis.env --env-file ./env/postgres-common.env --env-file ./env/postgres-volgactf-writer.env --env-file ./env/volgactf-final-public.env --env-file ./env/volgactf-final-private.env --env-file ./env/volgactf-final-auth-checker.env --env-file ./env/volgactf-final-main.env -v ./team_logo:/opt/volgactf/final/team_logo -v ./domain:/opt/volgactf/final/domain volgactf/volgactf-final-backend:0.1.0 cli $RAKE_OPTS
+RETVAL=$?
+exit $RETVAL

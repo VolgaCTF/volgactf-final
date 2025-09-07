@@ -1,0 +1,11 @@
+upstream volgactf-final-web {
+  {% for web_index in range(volgactf.final.web.replicas) %}
+  server volgactf-final-web-{{ web_index + 1 }}:3000;
+  {% endfor %}
+}
+
+upstream volgactf-final-stream {
+  {% for stream_index in range(volgactf.final.stream.replicas) %}
+  server volgactf-final-stream-{{ stream_index + 1 }}:4000;
+  {% endfor %}
+}

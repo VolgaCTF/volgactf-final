@@ -1,0 +1,249 @@
+networks:
+  {{ volgactf.final.network.name }}:
+    ipam:
+      driver: default
+      config:
+        - subnet: {{ volgactf.final.network.cidr }}
+
+volumes:
+  redis-persistence-volume:
+  postgres-data-volume:
+
+services:
+  # system
+  nginx:
+    image: {{ volgactf.final.nginx_main.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient.nginx.ip_address }}
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/volgactf_final.js:/etc/nginx/volgactf_final.js:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled
+      - ./nginx/certs:/etc/nginx/certs
+      - ./team_logo:/opt/volgactf/final/team_logo
+      - ./default_logo/default.png:/opt/volgactf/final/default.png
+      - ./dist:/opt/volgactf/final/dist
+  redis:
+    image: {{ volgactf.final.redis.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient.redis.ip_address }}
+    restart: always
+    volumes:
+      - redis-persistence-volume:/data
+  postgres:
+    image: {{ volgactf.final.postgres.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient.postgres.ip_address }}
+    restart: always
+    volumes:
+      - postgres-data-volume:/var/lib/postgresql/data
+      - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh:ro
+    environment:
+      - POSTGRES_PASSWORD={{ volgactf.final.db.root_pwd }}
+  volgactf-final-scheduler:
+    image: {{ volgactf.final.backend.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient.scheduler.ip_address }}
+    restart: always
+    command: "scheduler"
+    env_file:
+      - ./env/redis.env
+      - ./env/postgres-common.env
+      - ./env/postgres-volgactf-writer.env
+      - ./env/volgactf-final-main.env
+      - ./env/volgactf-final-public.env
+      - ./env/volgactf-final-private.env
+      - ./env/volgactf-final-auth-checker.env
+      - ./env/volgactf-final-auth-master.env
+      - ./env/volgactf-final-backend.env
+    volumes:
+      - ./team_logo:/opt/volgactf/final/team_logo
+      - ./upload:/opt/volgactf/final/upload
+    depends_on:
+       - postgres
+       - redis
+  {% for web_index in range(volgactf.final.web.replicas) %}
+  volgactf-final-web-{{ web_index + 1 }}:
+    image: {{ volgactf.final.backend.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['web-' + (web_index + 1)|string].ip_address }}
+    restart: always
+    command: "web 3000"
+    env_file:
+      - ./env/redis.env
+      - ./env/postgres-common.env
+      - ./env/postgres-volgactf-writer.env
+      - ./env/volgactf-final-main.env
+      - ./env/volgactf-final-public.env
+      - ./env/volgactf-final-private.env
+      - ./env/volgactf-final-auth-checker.env
+      - ./env/volgactf-final-auth-master.env
+      - ./env/volgactf-final-backend.env
+    volumes:
+      - ./team_logo:/opt/volgactf/final/team_logo
+      - ./upload:/opt/volgactf/final/upload
+    depends_on:
+      - postgres
+      - redis
+  {% endfor %}
+  {% for queue_index in range(volgactf.final.queue.replicas) %}
+  volgactf-final-queue-{{ queue_index + 1 }}:
+    image: {{ volgactf.final.backend.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['queue-' + (queue_index + 1)|string].ip_address }}
+    restart: always
+    command: "queue {{ queue_index +1 }}"
+    env_file:
+      - ./env/redis.env
+      - ./env/postgres-common.env
+      - ./env/postgres-volgactf-writer.env
+      - ./env/volgactf-final-main.env
+      - ./env/volgactf-final-public.env
+      - ./env/volgactf-final-private.env
+      - ./env/volgactf-final-auth-checker.env
+      - ./env/volgactf-final-auth-master.env
+      - ./env/volgactf-final-backend.env
+    volumes:
+      - ./team_logo:/opt/volgactf/final/team_logo
+      - ./upload:/opt/volgactf/final/upload
+    depends_on:
+       - postgres
+       - redis
+  {% endfor %}
+  {% for stream_index in range(volgactf.final.stream.replicas) %}
+  volgactf-final-stream-{{ stream_index + 1 }}:
+    image: {{ volgactf.final.stream.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['stream-' + (stream_index + 1)|string].ip_address }}
+    restart: always
+    env_file:
+      - ./env/redis.env
+      - ./env/postgres-common.env
+      - ./env/postgres-volgactf-reader.env
+      - ./env/volgactf-final-stream.env
+    depends_on:
+      - postgres
+      - redis
+  {% endfor %}
+
+  # admin
+  proxy-admin:
+    image: {{ volgactf.final.proxy.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['proxy-admin'].ip_address }}
+    restart: always
+    ports:
+      - "{{ volgactf.final.transient['proxy-admin'].port }}:3128"
+    volumes:
+      - ./proxy/squid.conf:/etc/squid/squid.conf:ro
+    extra_hosts:
+      - "{{ volgactf.final.hostname }}:{{ volgactf.final.transient.nginx.ip_address }}"
+  pgclient:
+    image: {{ volgactf.final.pgclient.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient.pgclient.ip_address }}
+    restart: always
+    ports:
+      - "{{ volgactf.final.transient.pgclient.port }}:8080"
+    depends_on:
+       - postgres
+
+  # checkers
+  {% for service_name, service_details in volgactf.final.services.items() %}
+  {{ service_name }}-checker-ingress:
+    image: {{ volgactf.final.nginx_checker.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient[service_name + '-checker-ingress'].ip_address }}
+    restart: always
+    environment:
+      NGINX_CONFIG: |
+        user nginx;
+
+        events {
+          worker_connections 1000;
+        }
+
+        http {
+          upstream service-01-checker {
+            server service-01-checker-1:80;
+            server service-01-checker-2:80;
+          }
+
+          server {
+            listen 80 default_server;
+            server_name _;
+            access_log /var/log/nginx/service-01-checker_access.log combined;
+            error_log /var/log/nginx/service-01-checker_error.log error;
+
+            charset utf-8;
+
+            location / {
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+              proxy_set_header Host $$http_host;
+
+              proxy_pass http://service-01-checker;
+              proxy_redirect off;
+
+              proxy_http_version 1.1;
+              chunked_transfer_encoding off;
+              proxy_buffering off;
+              proxy_cache off;
+
+              client_max_body_size 1m;
+            }
+          }
+        }
+    entrypoint:
+      - /bin/sh
+      - -c
+    command: >
+      'echo "$$NGINX_CONFIG" > /etc/nginx/nginx.conf
+      && nginx -g "daemon off;"'
+  {% for checker_index in range(service_details.checker.replicas) %}
+  {{ service_name }}-checker-{{ checker_index + 1 }}:
+    image: {{ service_details.checker.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient[service_name + '-checker-' + (checker_index + 1)|string].ip_address }}
+    restart: always
+    env_file:
+      - ./env/volgactf-final-public.env
+      - ./env/volgactf-final-auth-master.env
+      - ./env/volgactf-final-auth-checker.env
+  {% endfor %}
+  {% endfor %}
+
+  # teams
+  {% for team_name, team_details in volgactf.final.teams.items() %}
+  proxy-{{ team_name }}:
+    image: {{ volgactf.final.proxy.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['proxy-' + team_name].ip_address }}
+    restart: always
+    ports:
+      - "{{ volgactf.final.transient['proxy-' + team_name].port }}:3128"
+    volumes:
+      - ./proxy/squid.conf:/etc/squid/squid.conf:ro
+    extra_hosts:
+      - "{{ volgactf.final.hostname }}:{{ volgactf.final.transient.nginx.ip_address }}"
+  vulnbox-{{ team_name }}:
+    image: {{ team_details.vulnbox.image }}
+    networks:
+      {{ volgactf.final.network.name }}:
+        ipv4_address: {{ volgactf.final.transient['vulnbox-' + team_name].ip_address }}
+    restart: always
+  {% endfor %}

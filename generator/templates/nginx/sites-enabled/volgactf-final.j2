@@ -1,0 +1,270 @@
+
+server {
+  listen 80 default_server;
+  server_name {{ volgactf.final.hostname }};
+
+  location / {
+    return 301 https://$host$request_uri;
+  }
+}
+
+server {
+  server_name {{ volgactf.final.hostname }};
+  listen 443 ssl default_server;
+
+  http2 on;
+
+  ssl_certificate /etc/nginx/certs/{{ volgactf.final.hostname }}.pem;
+  ssl_certificate_key /etc/nginx/certs/{{ volgactf.final.hostname }}-key.pem;
+
+  access_log /var/log/nginx/volgactf-final_access.log combined;
+  error_log /var/log/nginx/volgactf-final_error.log error;
+
+  charset utf-8;
+
+  location / {
+    root /opt/volgactf/final/dist/target/frontend/public;
+    rewrite ^(.*)$ /index.html break;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /dist/ {
+    root /opt/volgactf/final/dist/target/frontend;
+    gzip_static on;
+    brotli_static on;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location = /api/team/logo {
+    if ($volgactf_final_identity = 0) {
+      return 403;
+    }
+
+    limit_req_status 429;
+    limit_req zone=volgactf_final_team_logo burst={{ volgactf.final.api_req_limit.team_logo.burst }}{% if volgactf.final.api_req_limit.team_logo.nodelay %} nodelay{% endif %};
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_intercept_errors on;
+
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /api/flag/v1/submit {
+    default_type text/plain;
+    if ($volgactf_final_identity = 0) {
+      return 403;
+    }
+
+    limit_req_status 429;
+    limit_req zone=volgactf_final_flag_submit burst={{ volgactf.final.api_req_limit.flag_submit.burst }}{% if volgactf.final.api_req_limit.flag_submit.nodelay %} nodelay{% endif %};
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_intercept_errors on;
+
+    client_max_body_size 33;
+
+    error_page 403 /flag_submit_403;
+    error_page 413 /flag_submit_413;
+    error_page 429 /flag_submit_429;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location = /flag_submit_403 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_submit_403;
+  }
+
+  location = /flag_submit_413 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_submit_413;
+  }
+
+  location = /flag_submit_429 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_submit_429;
+  }
+
+  location /api/service/v1/status {
+    default_type text/plain;
+    if ($volgactf_final_identity = 0) {
+      return 403;
+    }
+
+    limit_req_status 429;
+    limit_req zone=volgactf_final_service_status burst={{ volgactf.final.api_req_limit.service_status.burst }}{% if volgactf.final.api_req_limit.service_status.nodelay %} nodelay{% endif %};
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_intercept_errors on;
+
+    error_page 403 /service_getstatus_403;
+    error_page 404 /service_getstatus_404;
+    error_page 429 /service_getstatus_429;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location = /service_getstatus_403 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.service_getstatus_403;
+  }
+
+  location = /service_getstatus_404 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.service_getstatus_404;
+  }
+
+  location = /service_getstatus_429 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.service_getstatus_429;
+  }
+
+  location /api/flag/v1/info {
+    default_type text/plain;
+    if ($volgactf_final_identity = 0) {
+      return 403;
+    }
+
+    limit_req_status 429;
+    limit_req zone=volgactf_final_flag_info burst={{ volgactf.final.api_req_limit.flag_info.burst }}{% if volgactf.final.api_req_limit.flag_info.nodelay %} nodelay{% endif %};
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_intercept_errors on;
+
+    error_page 403 /flag_getinfo_403;
+    error_page 404 /flag_getinfo_404;
+    error_page 429 /flag_getinfo_429;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location = /flag_getinfo_403 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_getinfo_403;
+  }
+
+  location = /flag_getinfo_404 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_getinfo_404;
+  }
+
+  location = /flag_getinfo_429 {
+    internal;
+    default_type text/plain;
+    js_content volgactf_final.flag_getinfo_429;
+  }
+
+  location ~ ^/api/team/logo/(\d+)\.png$ {
+    alias /opt/volgactf/final/team_logo;
+    expires 1d;
+    try_files /$1.png /team_logo_default;
+    add_header Cache-Control public;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location = /team_logo_default {
+    internal;
+    alias /opt/volgactf/final/default.png;
+    expires 1d;
+    add_header Cache-Control public;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /api/ {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+
+    client_max_body_size 1m;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /stream/ {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-stream;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 1h;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /visualization {
+    set $contest_title "{{ volgactf.final.competition.title }}";
+    ssi on;
+    alias /opt/volgactf/final/dist/target/visualization;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
+  location /media {
+    {% for team_cidr in volgactf.final.transient.network.teams %}
+    allow {{ team_cidr }};
+    {% endfor %}
+    {% for internal_cidr in volgactf.final.transient.network.internal %}
+    allow {{ internal_cidr }};
+    {% endfor %}
+    deny all;
+
+    alias /opt/volgactf/final/media;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+}

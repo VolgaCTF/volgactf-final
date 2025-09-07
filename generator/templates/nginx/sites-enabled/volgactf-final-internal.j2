@@ -1,0 +1,30 @@
+server {
+  listen 8000 default_server;
+  server_name _;
+
+  access_log /var/log/nginx/volgactf-final-internal_access.log combined;
+  error_log /var/log/nginx/volgactf-final-internal_error.log error;
+
+  charset utf-8;
+
+  location /api/checker/v2/ {
+    {% for internal_cidr in volgactf.final.transient.network.internal %}
+    allow {{ internal_cidr }};
+    {% endfor %}
+    deny all;
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    proxy_pass http://volgactf-final-web;
+    proxy_redirect off;
+
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_buffering off;
+    proxy_cache off;
+
+    client_max_body_size 1m;
+  }
+}
