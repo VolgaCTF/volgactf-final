@@ -19,3 +19,13 @@ Additionally, you can go to `127.0.0.1:{{ volgactf.final.transient.pgclient.port
 - database name: `volgactf_final`
 - database username: `volgactf_final_reader`
 - database password: `{{ volgactf.final.db.reader_pwd }}`
+
+Last but not least, if you use [VolgaCTF Final CLI](https://github.com/VolgaCTF/volgactf-final-py) you should export the following environment variables:
+
+```shell
+export VOLGACTF_FINAL_API_ENDPOINT=https://{{ volgactf.final.hostname }}
+export VOLGACTF_FINAL_PROXY=127.0.0.1:{{ volgactf.final.transient['proxy-' + (volgactf.final.teams.items()|first)[0] ].port }}  # this is for the first team, adjust according to the proxy information above
+export VOLGACTF_FINAL_VERIFY="{{ volgactf.final.transient.ca_root }}"
+```
+
+Refer to the generator documentation for more information on control and maintenance tools.

@@ -27,6 +27,11 @@ def get_random_str(size=32):
 def prepare_context(vars_file):
     # Load variables
     context = load_vars(vars_file)
+    context['volgactf']['final']['transient'] = {}
+
+    ca_root_dir = run_cmd('mkcert -CAROOT', '.', capture_output=True).stdout.strip()
+    ca_root = f"{ca_root_dir}/rootCA.pem"
+    context['volgactf']['final']['transient']['ca_root'] = ca_root
 
     net = ipaddress.ip_network(context['volgactf']['final']['network']['cidr'])
     subnets = list(net.subnets(new_prefix=24))
@@ -37,8 +42,6 @@ def prepare_context(vars_file):
     system_subnet = subnets[0]
     admin_subnet = subnets[-1]
     checker_subnet = subnets[-2]
-
-    context['volgactf']['final']['transient'] = {}
 
     system_ips = list(system_subnet.hosts())
     context['volgactf']['final']['transient']['nginx'] = {'ip_address': system_ips[1]}
