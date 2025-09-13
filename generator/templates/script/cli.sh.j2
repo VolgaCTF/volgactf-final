@@ -27,6 +27,6 @@ if [ "$COMMAND" = "service" ] && [ "$SUBCOMMAND" = "enable" ]; then
 fi
 
 PROJECT=`docker compose ls -q`
-docker run --rm -a STDIN -a STDOUT -a STDERR --network ${PROJECT}_{{ volgactf.final.network.name }} --env-file ./env/redis.env --env-file ./env/postgres-common.env --env-file ./env/postgres-volgactf-writer.env --env-file ./env/volgactf-final-public.env --env-file ./env/volgactf-final-private.env --env-file ./env/volgactf-final-auth-checker.env --env-file ./env/volgactf-final-main.env -v ./team_logo:/opt/volgactf/final/team_logo -v ./domain:/opt/volgactf/final/domain volgactf/volgactf-final-backend:0.1.0 cli $RAKE_OPTS
+docker run --rm -a STDIN -a STDOUT -a STDERR --network ${PROJECT}_{{ volgactf.final.network.name }} --env-file ./env/redis.env --env-file ./env/postgres-common.env --env-file ./env/postgres-volgactf-writer.env --env-file ./env/volgactf-final-public.env --env-file ./env/volgactf-final-private.env --env-file ./env/volgactf-final-auth-checker.env --env-file ./env/volgactf-final-main.env -v ./team_logo:/opt/volgactf/final/team_logo -v ./domain:/opt/volgactf/final/domain {{ volgactf.final.backend.image }} cli $RAKE_OPTS
 RETVAL=$?
 exit $RETVAL

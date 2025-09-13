@@ -9,3 +9,4 @@ limit_req_zone $volgactf_final_identity zone=volgactf_final_flag_info:10m rate={
 limit_req_zone $volgactf_final_identity zone=volgactf_final_flag_submit:10m rate={{ volgactf.final.api_req_limit.flag_submit.rate }};
 limit_req_zone $volgactf_final_identity zone=volgactf_final_service_status:10m rate={{ volgactf.final.api_req_limit.service_status.rate }};
 limit_req_zone $volgactf_final_identity zone=volgactf_final_team_logo:10m rate={{ volgactf.final.api_req_limit.team_logo.rate }};
+limit_req_zone $volgactf_final_identity zone=volgactf_final_open_data:10m rate={{ volgactf.final.api_req_limit.open_data.rate }};

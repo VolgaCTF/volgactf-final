@@ -43,6 +43,22 @@ function service_getstatus_429 (r) {
   return_text(r, 429, 'ERROR_RATELIMIT')
 }
 
+function team_logo_403 (r) {
+  return_text(r, 403, 'ERROR_ACCESS_DENIED')
+}
+
+function team_logo_429 (r) {
+  return_text(r, 429, 'ERROR_RATELIMIT')
+}
+
+function open_data_403 (r) {
+  return_text(r, 403, 'ERROR_ACCESS_DENIED')
+}
+
+function open_data_429 (r) {
+  return_text(r, 429, 'ERROR_RATELIMIT')
+}
+
 export default {
   flag_getinfo_403,
   flag_getinfo_404,
@@ -52,5 +68,9 @@ export default {
   flag_submit_429,
   service_getstatus_403,
   service_getstatus_404,
-  service_getstatus_429
+  service_getstatus_429,
+  team_logo_403,
+  team_logo_429,
+  open_data_403,
+  open_data_429
 }
