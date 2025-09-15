@@ -79,7 +79,7 @@ volgactf:
     postgres:
       image: 'postgres:17.6'
     backend:
-      image: 'volgactf/volgactf-final-backend:0.2.0'
+      image: 'volgactf/volgactf-final-backend:0.3.0'
     pgclient:
       image: 'adminer:5.3.0'
     proxy:
