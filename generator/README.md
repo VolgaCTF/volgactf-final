@@ -7,7 +7,7 @@ The generator scaffolds a docker compose project with a fully functional VolgaCT
 - Python 3
 - Docker Compose
 - [mkcert](https://github.com/FiloSottile/mkcert)
-- (optional) any browser extension to conect to HTTP proxy e. g. [FoxyProxy](https://chromewebstore.google.com/detail/foxyproxy/gcknhkkoolaabfmlnjonogaaifnjlfnp)
+- any browser extension to connect to HTTP proxy e. g. [FoxyProxy](https://chromewebstore.google.com/detail/foxyproxy/gcknhkkoolaabfmlnjonogaaifnjlfnp)
 
 ## Setup
 

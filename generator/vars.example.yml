@@ -70,23 +70,23 @@ volgactf:
     queue:
       replicas: 2
     stream:
-      image: 'volgactf/volgactf-final-stream:1.1.0'
+      image: 'volgactf/volgactf-final-stream:1.2.0'
       replicas: 2
     nginx_main:
-      image: 'volgactf/volgactf-final-nginx:0.2.0'
+      image: 'volgactf/volgactf-final-nginx:0.2.2'
     redis:
       image: 'redis:8.2.1'
     postgres:
       image: 'postgres:17.6'
     backend:
-      image: 'volgactf/volgactf-final-backend:0.3.0'
+      image: 'volgactf/volgactf-final-backend:0.4.0'
     pgclient:
       image: 'adminer:5.3.0'
     proxy:
       image: 'sameersbn/squid:latest'
     nginx_checker:
-      image: 'nginx:1.29.1'
+      image: 'volgactf/volgactf-final-nginx-checker:0.1.2'
     frontend:
-      image: 'volgactf/volgactf-final-frontend:0.0.3-2025'
+      image: 'volgactf/volgactf-final-frontend:0.0.4-2025'
     visualization:
-      image: 'volgactf/volgactf-final-visualization:0.0.2'
+      image: 'volgactf/volgactf-final-visualization:0.0.3'
