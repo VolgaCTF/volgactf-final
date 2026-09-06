@@ -195,13 +195,13 @@ def run_cmd(cmd, cwd, check=True, capture_output=False):
 
 def service_running(service, cwd):
     """Check if a service container is running in docker compose"""
-    result = run_cmd(f"docker compose ps -q {service}", cwd, capture_output=True)
+    result = run_cmd(f"sudo docker compose ps -q {service}", cwd, capture_output=True)
     print(f"ps -> {result}")
     cid = result.stdout.strip()
     if not cid:
         return False
     # Confirm it's actually running
-    result = run_cmd(f"docker inspect -f '{{{{.State.Running}}}}' {cid}", cwd, capture_output=True)
+    result = run_cmd(f"sudo docker inspect -f '{{{{.State.Running}}}}' {cid}", cwd, capture_output=True)
     print(f"inspect -> {result}")
     return result.stdout.strip() == "true"
 
@@ -214,7 +214,7 @@ def first_init(work_dir):
         already = service_running(svc, work_dir)
         were_running[svc] = already
         if not already:
-            run_cmd(f"docker compose up -d {svc}", work_dir)
+            run_cmd(f"sudo docker compose up -d {svc}", work_dir)
 
     time.sleep(1)
     run_cmd(f"./script/dist-frontend.sh", work_dir)
@@ -226,7 +226,7 @@ def first_init(work_dir):
 
     for svc, already in were_running.items():
         if not already:
-            run_cmd(f"docker compose stop {svc}", work_dir)
+            run_cmd(f"sudo docker compose stop {svc}", work_dir)
 
 
 if __name__ == "__main__":

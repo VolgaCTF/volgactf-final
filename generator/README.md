@@ -4,10 +4,13 @@ The generator scaffolds a docker compose project with a fully functional VolgaCT
 
 ## Prerequisites
 
+- system user with sudo permissions
 - Python 3
 - Docker Compose
 - [mkcert](https://github.com/FiloSottile/mkcert)
 - any browser extension to connect to HTTP proxy e. g. [FoxyProxy](https://chromewebstore.google.com/detail/foxyproxy/gcknhkkoolaabfmlnjonogaaifnjlfnp)
+
+Note: none of the commands in the subsequent sections, unless stated explicitly, require sudo. Instead, the scripts automatically elevate privileges when they need to.
 
 ## Setup
 
@@ -58,11 +61,11 @@ $ deactivate
 To start the system:
 1. Navigate to the `generated` directory.
 2. Read through post-generator steps and apply changes if necessary (add the system hostname to the local resolver, configure proxies in a browser)
-3. Launch the system with `docker compose up -d`. This will take some time.
+3. Launch the system with `sudo docker compose up -d`. This will take some time.
 4. Connect to a proxy (of an admin or of a specific team).
 5. Navigate to the system hostname e. g. `https://final.volgactf.test` (specificed in `volgactf.final.hostname`).
 
-To shut down: either `docker compose down` or `docker compose down -v` to do cleanup.
+To shut down: either `sudo docker compose down` or `sudo docker compose down -v` to do cleanup.
 
 ## Regenerate
 

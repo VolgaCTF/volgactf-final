@@ -2,25 +2,34 @@
 DIST_DIR="./dist"
 
 DIST_VISUALIZATION_DIR="${DIST_DIR}/visualization"
+sudo mkdir -p ${DIST_VISUALIZATION_DIR}
+sudo chown -R $(id -u):$(id -g) ${DIST_VISUALIZATION_DIR}
+
 test -d ${DIST_VISUALIZATION_DIR} && rm -rf `ls -1dr ${DIST_VISUALIZATION_DIR}/* | tail -n +2 | tr '\n' ' '`
 VISUALIZATION_BUILD_NAME=`date +%Y%m%d_%H%M%S`
 VISUALIZATION_TARGET_DIR=${DIST_VISUALIZATION_DIR}/${VISUALIZATION_BUILD_NAME}
-mkdir -p ${VISUALIZATION_TARGET_DIR}
-docker run --rm -a STDIN -a STDOUT -a STDERR -v ${VISUALIZATION_TARGET_DIR}:/dist {{ volgactf.final.visualization.image }} copy /dist
+sudo mkdir -p ${VISUALIZATION_TARGET_DIR}
+sudo chown $(id -u):$(id -g) ${VISUALIZATION_TARGET_DIR}
+sudo docker run --user $(id -u):$(id -g) --rm -a STDIN -a STDOUT -a STDERR -v ${VISUALIZATION_TARGET_DIR}:/dist {{ volgactf.final.visualization.image }} copy /dist
 
 DIST_FRONTEND_DIR="${DIST_DIR}/frontend"
+sudo mkdir -p ${DIST_FRONTEND_DIR}
+sudo chown -R $(id -u):$(id -g) ${DIST_FRONTEND_DIR}
+
 test -d ${DIST_FRONTEND_DIR} && rm -rf `ls -1dr ${DIST_FRONTEND_DIR}/* | tail -n +2 | tr '\n' ' '`
 FRONTEND_BUILD_NAME=`date +%Y%m%d_%H%M%S`
 FRONTEND_TARGET_DIR=${DIST_FRONTEND_DIR}/${FRONTEND_BUILD_NAME}
-mkdir -p ${FRONTEND_TARGET_DIR}
-docker run --rm -a STDIN -a STDOUT -a STDERR -v ${FRONTEND_TARGET_DIR}:/dist {{ volgactf.final.frontend.image }} copy /dist
+sudo mkdir -p ${FRONTEND_TARGET_DIR}
+sudo chown $(id -u):$(id -g) ${FRONTEND_TARGET_DIR}
+sudo docker run --user $(id -u):$(id -g) --rm -a STDIN -a STDOUT -a STDERR -v ${FRONTEND_TARGET_DIR}:/dist {{ volgactf.final.frontend.image }} copy /dist
 
 
 TARGET_DIR="${DIST_DIR}/target"
-mkdir -p ${TARGET_DIR}
+sudo mkdir -p ${TARGET_DIR}
+sudo chown $(id -u):$(id -g) ${TARGET_DIR}
 
 TARGET_VISUALIZATION_DIR="${TARGET_DIR}/visualization"
-ln -sfn /opt/volgactf/final/dist/visualization/${VISUALIZATION_BUILD_NAME} ${TARGET_VISUALIZATION_DIR}
+sudo ln -sfn /opt/volgactf/final/dist/visualization/${VISUALIZATION_BUILD_NAME} ${TARGET_VISUALIZATION_DIR}
 
 TARGET_FRONTEND_DIR="${TARGET_DIR}/frontend"
-ln -sfn /opt/volgactf/final/dist/frontend/${FRONTEND_BUILD_NAME} ${TARGET_FRONTEND_DIR}
+sudo ln -sfn /opt/volgactf/final/dist/frontend/${FRONTEND_BUILD_NAME} ${TARGET_FRONTEND_DIR}
