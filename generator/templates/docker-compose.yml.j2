@@ -242,7 +242,21 @@ services:
     extra_hosts:
       - "{{ volgactf.final.hostname }}:{{ volgactf.final.transient.nginx.ip_address }}"
   vulnbox-{{ team_name }}:
+  {% if 'port_mapping' in team_details.vulnbox %}
+    image: alpine/socat
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+    {% for rule in team_details.vulnbox.port_mapping %}
+        socat {{ rule.protocol }}-listen:{{ rule.listen_port }},fork,reuseaddr {{ rule.protocol }}-connect:{{ rule.target_host }}:{{ rule.target_port }} &
+    {% endfor %}
+        wait
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  {% else %}
     image: {{ team_details.vulnbox.image }}
+  {% endif %}
     networks:
       {{ volgactf.final.network.name }}:
         ipv4_address: {{ volgactf.final.transient['vulnbox-' + team_name].ip_address }}

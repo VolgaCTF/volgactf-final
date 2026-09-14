@@ -45,6 +45,47 @@ The next important group of options is the range of exposed ports (`volgactf.fin
 
 In essence all the traffic coming into the system is routed through those proxies - neither a system backend servers or service checkers are exposed publicly. This allows quick switching between different actors in the system.
 
+### Team vulnboxes and port forwarding
+
+Each team can run a vulnerable service image using `vulnbox.image`, or forward
+ports to existing services using `vulnbox.port_mapping`. For example, under
+`volgactf.final.teams`:
+
+```yaml
+team-01:
+  name: 'team #1'
+  vulnbox:
+    port_mapping:
+      - listen_port: 8000
+        target_port: 48000
+      - listen_port: 8001
+        target_port: 48001
+        target_host: host.docker.internal
+        protocol: tcp
+team-02:
+  name: 'team #2'
+  vulnbox:
+    image: 'volgactf/volgactf-final-devenv-service:2.0.1'
+```
+
+Forwarding mode creates one `alpine/socat` container at the team's usual vulnbox
+IP, with a listener for each rule. `listen_port` is the port on that container;
+`target_port` is the destination port. Both must be YAML integers from 1 to
+65535. `target_host` defaults to `host.docker.internal` and accepts a DNS name or
+IPv4 address. `protocol` defaults to `tcp` and also accepts `udp`.
+
+When present, `port_mapping` takes precedence over `image` and must be a non-empty
+list. Each `(protocol, listen_port)` pair must be unique within a team. Invalid
+rules are rejected before generation starts. Image-based and forwarding teams
+can coexist; the `services` checker configuration does not change.
+
+The generated container includes `host.docker.internal:host-gateway`. On Linux,
+this points to the host's Docker bridge address, so destination services must
+listen on an address reachable from that bridge (for example, the bridge address
+or `0.0.0.0`). Services bound exclusively to host `127.0.0.1` are not reachable
+through this mapping. A `target_host` of `localhost` refers to the socat container
+itself. See [Docker networking documentation](https://docs.docker.com/compose/how-tos/networking/).
+
 ## Generate
 
 Choose an empty directory, in the example below `generated` will be used

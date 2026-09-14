@@ -4,6 +4,7 @@ from ecdsa import SigningKey, NIST256p
 import ipaddress
 import os
 import random
+import re
 import string
 import shlex
 import subprocess
@@ -24,9 +25,56 @@ def get_random_str(size=32):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(size))
 
 
+def normalize_port_mappings(context):
+    for team_name, team_details in context['volgactf']['final']['teams'].items():
+        vulnbox = team_details['vulnbox']
+        if 'port_mapping' not in vulnbox:
+            continue
+        rules = vulnbox['port_mapping']
+        prefix = f"Team {team_name}: vulnbox.port_mapping"
+        if not isinstance(rules, list) or not rules:
+            raise ValueError(f"{prefix} must be a non-empty list")
+        normalized = []
+        listeners = set()
+        for index, rule in enumerate(rules, start=1):
+            location = f"{prefix} rule {index}"
+            if not isinstance(rule, dict):
+                raise ValueError(f"{location} must be an object")
+            unknown = rule.keys() - {'listen_port', 'target_port', 'target_host', 'protocol'}
+            if unknown:
+                raise ValueError(f"{location} has unknown fields: {', '.join(map(str, unknown))}")
+            for field in ('listen_port', 'target_port'):
+                port = rule.get(field)
+                if type(port) is not int or not 1 <= port <= 65535:
+                    raise ValueError(f"{location}: {field} must be an integer from 1 to 65535")
+            protocol = rule.get('protocol', 'tcp')
+            if protocol not in ('tcp', 'udp'):
+                raise ValueError(f"{location}: protocol must be tcp or udp")
+            host = rule.get('target_host', 'host.docker.internal')
+            valid_host = isinstance(host, str) and 0 < len(host) <= 253
+            if valid_host:
+                if re.fullmatch(r'[0-9.]+', host):
+                    try:
+                        ipaddress.IPv4Address(host)
+                    except ValueError:
+                        valid_host = False
+                else:
+                    valid_host = all(re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?', label)
+                                     for label in host.rstrip('.').split('.')) and not host.endswith('..')
+            if not valid_host:
+                raise ValueError(f"{location}: target_host must be a DNS name or IPv4 address")
+            listener = (protocol, rule['listen_port'])
+            if listener in listeners:
+                raise ValueError(f"{location}: duplicate {protocol} listen_port {rule['listen_port']}")
+            listeners.add(listener)
+            normalized.append({**rule, 'protocol': protocol, 'target_host': host})
+        vulnbox['port_mapping'] = normalized
+
+
 def prepare_context(vars_file):
     # Load variables
     context = load_vars(vars_file)
+    normalize_port_mappings(context)
     context['volgactf']['final']['transient'] = {}
 
     ca_root_dir = run_cmd('mkcert -CAROOT', '.', capture_output=True).stdout.strip()
