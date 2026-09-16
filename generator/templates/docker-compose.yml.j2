@@ -41,7 +41,7 @@ services:
         ipv4_address: {{ volgactf.final.transient.postgres.ip_address }}
     restart: always
     volumes:
-      - postgres-data-volume:/var/lib/postgresql/data
+      - postgres-data-volume:/var/lib/postgresql
       - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh:ro
     environment:
       - POSTGRES_PASSWORD={{ volgactf.final.db.root_pwd }}

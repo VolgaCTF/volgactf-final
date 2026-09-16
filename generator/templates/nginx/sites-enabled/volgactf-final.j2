@@ -309,6 +309,13 @@ server {
     add_header Strict-Transport-Security "max-age=15768000" always;
   }
 
+  location /visualisation {
+    set $contest_title "{{ volgactf.final.competition.title }}";
+    ssi on;
+    alias /opt/volgactf/final/dist/target/visualization;
+    add_header Strict-Transport-Security "max-age=15768000" always;
+  }
+
   location /media {
     {% for team_cidr in volgactf.final.transient.network.teams %}
     allow {{ team_cidr }};
