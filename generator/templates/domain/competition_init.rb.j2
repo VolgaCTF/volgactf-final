@@ -29,6 +29,7 @@ module VolgaCTF
         vulnbox_endpoint_code %Q[::IP.new('%{team_network}').to_range.first | ::IP.new('0.0.0.3')]
         checker_endpoint 'http://{{ service_name }}-checker-ingress'
         attack_priority true
+        poll_grace_period {{ service_details.poll_grace_period | default(0) }}
       end
 
       {% endfor %}
